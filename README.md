@@ -1,27 +1,78 @@
-# SvgRectangleDrawing
+# Angular SVG Drawing Project
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.1.
+This project is an Angular application for drawing and interacting with an SVG rectangle. The user can resize and drag the rectangle, and the perimeter of the rectangle is displayed near it. The initial dimensions of the rectangle are loaded from a JSON file, and changes are saved back to the server via a C# API.
 
-## Development server
+## Features
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+- Draw an SVG rectangle with initial dimensions from a JSON file.
+- Display the perimeter of the rectangle near the figure.
+- Allow the user to resize and drag the rectangle using the mouse.
+- Update the JSON file with new dimensions after resizing.
+- Import and export the SVG as JSON.
 
-## Code scaffolding
+## Technologies Used
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- Angular
+- SVG.js
+- Interact.js
+- C# (for backend API)
 
-## Build
+## Installation
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+1. **Clone the repository:**
 
-## Running unit tests
+    ```bash
+    git clone https://github.com/yourusername/angular-svg-drawing.git
+    cd angular-svg-drawing
+    ```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+2. **Install the dependencies:**
 
-## Running end-to-end tests
+    ```bash
+    npm install
+    ```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+3. **Start the Angular development server:**
 
-## Further help
+    ```bash
+    ng serve
+    ```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+    The application will be available at `http://localhost:4200`.
+
+4. **Run the backend server (C# API):**
+
+    Follow the instructions in the backend project to set up and run the C# API server.
+
+## Usage
+
+1. **Initial Setup:**
+
+    - The initial dimensions of the SVG rectangle are fetched from a JSON file on the server.
+
+2. **Interacting with the Rectangle:**
+
+    - Drag the rectangle to move it.
+    - Resize the rectangle by dragging its edges or corners.
+    - The perimeter of the rectangle is displayed near the figure and updates as you resize.
+
+3. **Import and Export:**
+
+    - Export the current SVG as JSON by clicking the "Export SVG as JSON" button.
+    - Import an SVG JSON file by selecting a file using the file input.
+
+## Project Structure
+
+- `src/app/svg-drawing/svg-drawing.component.ts`: Main component handling the SVG drawing logic.
+- `src/app/svg-drawing/svg-drawing.component.html`: Template for the SVG drawing component.
+- `src/app/svg-drawing/svg-drawing.component.css`: Styles for the SVG drawing component.
+- `src/app/svg-service.service.ts`: Service for handling SVG export and import.
+- `src/app/api.service.ts`: Service for communicating with the backend API.
+
+## Backend API
+
+The backend API is a C# application that provides endpoints for fetching and updating the SVG dimensions. Ensure the backend server is running and properly configured to interact with the Angular frontend.
+
+## License
+
+This project is licensed under the MIT License.
