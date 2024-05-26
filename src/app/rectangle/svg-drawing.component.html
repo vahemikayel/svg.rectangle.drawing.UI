@@ -1,7 +1,12 @@
 <div class="svg-container" #svgContainer>
-  <!-- SVG drawing will be rendered here -->
+  <!-- <div class="perimeter-display">Perimeter: {{ perimeter }}</div> -->
 </div>
 
 <div class="perimeter">
   Perimeter: {{ perimeter }}
+</div>
+
+<div class="controls">
+  <button (click)="exportSvg()">Export SVG as JSON</button>
+  <input type="file" (change)="onFileSelected($event)" />
 </div>

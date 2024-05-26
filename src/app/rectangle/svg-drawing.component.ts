@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, HostListener, ChangeDetectorRef  } from '@angular/core';
 import { SvgService } from '../svg-service.service';
 import { ApiService } from '../api.service';
 import { SvgModel } from '../models/svg.model';
@@ -23,7 +23,7 @@ export class SvgDrawingComponent implements OnInit {
   private draw: any;
   svgData!: SvgModel;
 
-  constructor(private svgService: SvgService, private apiService: ApiService) { }
+  constructor(private svgService: SvgService, private apiService: ApiService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.apiService.getSVG().subscribe({
@@ -42,84 +42,56 @@ export class SvgDrawingComponent implements OnInit {
   }
 
   initSvg() {
-    this.draw = SVG().addTo(this.svgContainer.nativeElement).size('100%', '100%'); 
+    this.draw = SVG().addTo(this.svgContainer.nativeElement).size('100%', '100%');
     const rect = this.draw.rect(this.svgData.width, this.svgData.height).attr({ fill: '#f06' });
 
+    rect.draggable();
     interact(rect.node)
-    .draggable({
-      onmove: event => {
-        const target = event.target;
-        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-
-        target.style.transform = `translate(${x}px, ${y}px)`;
-        target.setAttribute('data-x', x);
-        target.setAttribute('data-y', y);
-      },
-      onend: () => {
-        this.updateDimensionsFromElement(rect);
-      }
-    })
-    .resizable({
-      edges: { left: true, right: true, bottom: true, top: true },
-      listeners: {
-        move: event => {
+      .draggable({
+        onmove: event => {
           const target = event.target;
-          let x = (parseFloat(target.getAttribute('data-x')) || 0);
-          let y = (parseFloat(target.getAttribute('data-y')) || 0);
-
-          // Update the element's width and height
-          target.style.width = event.rect.width + 'px';
-          target.style.height = event.rect.height + 'px';
-
-          // Translate when resizing from top or left edges
-          x += event.deltaRect.left;
-          y += event.deltaRect.top;
-
+          const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+          const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
           target.style.transform = `translate(${x}px, ${y}px)`;
           target.setAttribute('data-x', x);
           target.setAttribute('data-y', y);
 
-          // Update the rect dimensions
-          rect.size(event.rect.width, event.rect.height);
+          this.updatePerimeter();
         },
-        end: () => {
+        onend: () => {
           this.updateDimensionsFromElement(rect);
         }
-      }
-    });
+      })
+      .resizable({
+        edges: { left: true, right: true, bottom: true, top: true },
+        listeners: {
+          move: event => {
+            const target = event.target;
+            let x = (parseFloat(target.getAttribute('data-x')) || 0);
+            let y = (parseFloat(target.getAttribute('data-y')) || 0);
 
-  this.updateDimensionsFromElement(rect);
-    // rect.draggable();
-    // svgResize(rect);
+            target.style.width = event.rect.width + 'px';
+            target.style.height = event.rect.height + 'px';
 
-    // rect.on('resized', () => {
-    //   this.svgData.width = rect.width();
-    //   this.svgData.height = rect.height();
-    //   this.updatePerimeter();
-    //   this.apiService.saveDimensions(this.svgData).subscribe({
-    //     next: () => {
-    //       console.log('Dimensions updated successfully');
-    //     },
-    //     error: err => {
-    //       console.error('Error updating dimensions', err);
-    //     }
-    //   });
-    // });
+            x += event.deltaRect.left;
+            y += event.deltaRect.top;
 
-    // rect.draggable().on('dragend', () => {
-    //   this.svgData.width = rect.width();
-    //   this.svgData.height = rect.height();
-    //   this.updatePerimeter();
-    //   this.apiService.saveDimensions(this.svgData).subscribe({
-    //     next: () => {
-    //       console.log('Dimensions updated successfully');
-    //     },
-    //     error: err => {
-    //       console.error('Error updating dimensions', err);
-    //     }
-    //   });
-    // });
+            target.style.transform = `translate(${x}px, ${y}px)`;
+            target.setAttribute('data-x', x);
+            target.setAttribute('data-y', y);
+
+            rect.size(event.rect.width, event.rect.height);
+
+            this.updatePerimeter();
+          },
+          end: () => {
+            this.updateDimensionsFromElement(rect);
+          }
+        }
+      });
+
+    this.updateDimensionsFromElement(rect);
+
   }
 
   updateDimensionsFromElement(rect: any) {
@@ -138,5 +110,28 @@ export class SvgDrawingComponent implements OnInit {
 
   updatePerimeter() {
     this.perimeter = 2 * (this.svgData.width + this.svgData.height);
+    this.cdr.detectChanges();
+  }
+
+  exportSvg() {
+    const svgJson = this.svgService.exportSvg(this.svgContainer.nativeElement.querySelector('svg'));
+    console.log(svgJson);
+  }
+
+  importSvg(svgJson: string) {
+    this.svgService.importSvg(svgJson, this.svgContainer);
+    this.updatePerimeter();
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const svgJson = e.target.result;
+        this.importSvg(svgJson);
+      };
+      reader.readAsText(input.files[0]);
+    }
   }
 }
